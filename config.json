@@ -1,0 +1,15 @@
+{
+  "name": "Plow Sweeper Activity Investigation by Advantage One",
+  "supportEmail": "shane@advtracking.net",
+  "version": "0.1.1",
+  "items": [
+    {
+      "url": "https://advshane.github.io/plow-sweeper-addin/plowSweeperInvestigation.html",
+      "path": "ActivityLink/",
+      "menuName": {
+        "en": "Plow/Sweeper Activity Investigation"
+      }
+    }
+  ],
+  "isSigned": false
+}
