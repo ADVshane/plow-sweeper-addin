@@ -89,10 +89,35 @@ geotab.addin.plowSweeperInvestigation = function () {
     });
   }
 
+  // Starting view: the user's last view, else the fleet's area, else a wide North America view.
+  const VIEW_KEY = 'psi-map-view';
+  const loadView = () => { try { return JSON.parse(localStorage.getItem(VIEW_KEY)); } catch (e) { return null; } };
+  const saveView = () => {
+    try { const c = map.getCenter(); localStorage.setItem(VIEW_KEY, JSON.stringify({ lat: c.lat, lng: c.lng, zoom: map.getZoom() })); } catch (e) {}
+  };
+
+  async function fitToFleet() {
+    try {
+      const pts = (await call('Get', { typeName: 'DeviceStatusInfo',
+        propertySelector: { fields: ['latitude', 'longitude'] } }))
+        .filter(s => s.latitude && s.longitude);
+      if (!pts.length) return;
+      // ignore outliers: keep vehicles within ~150 km of the fleet's median position
+      const median = arr => { const s = arr.slice().sort((a, b) => a - b); return s[Math.floor(s.length / 2)]; };
+      const mLat = median(pts.map(p => p.latitude)), mLng = median(pts.map(p => p.longitude));
+      const near = pts.filter(p => Math.abs(p.latitude - mLat) < 1.35 && Math.abs(p.longitude - mLng) < 1.9);
+      const bounds = L.latLngBounds((near.length ? near : pts).map(p => [p.latitude, p.longitude]));
+      map.fitBounds(bounds.pad(0.2), { maxZoom: 13 });
+    } catch (e) { /* keep the fallback view */ }
+  }
+
   function initMap() {
     if (map) return;
     ensureCss();
-    map = L.map('psi-map').setView([43.65, -79.38], 11);
+    const saved = loadView();
+    map = L.map('psi-map').setView(saved ? [saved.lat, saved.lng] : [50, -95], saved ? saved.zoom : 4);
+    map.on('moveend', saveView);
+    if (!saved) fitToFleet();
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
     const items = new L.FeatureGroup().addTo(map);

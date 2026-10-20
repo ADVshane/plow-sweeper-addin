@@ -35,6 +35,10 @@
         case 'ReprocessRequest': return [{ id: s.id, status: requests[s.id] }];
         case 'DeviceReprocessRequest': return children[s.reprocessRequestId] || [];
         case 'ExceptionEvent': return events;
+        case 'DeviceStatusInfo':   // sample fleet around Newmarket, ON plus one far-away outlier
+          return [[44.05, -79.46], [44.06, -79.48], [44.03, -79.44], [44.07, -79.45], [44.04, -79.50],
+                  [44.02, -79.47], [44.08, -79.43], [44.05, -79.42], [44.06, -79.51], [49.28, -123.12]]
+            .map(([la, lo]) => ({ latitude: la, longitude: lo }));
         case 'Device': { const t = trucks.find(x => x[0] === s.id); return t ? [{ id: t[0], name: t[1] }] : []; }
         default: return [];
       }
