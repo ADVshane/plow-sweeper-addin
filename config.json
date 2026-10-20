@@ -1,0 +1,13 @@
+{
+  "name": "Plow/Sweeper Activity Investigation",
+  "supportEmail": "shane@advtracking.net",
+  "version": "0.1.0",
+  "items": [
+    {
+      "url": "https://YOUR-HOST/plow-sweeper-addin/plowSweeperInvestigation.html",
+      "path": "ActivityLink/",
+      "menuName": { "en": "Plow/Sweeper Activity Investigation" }
+    }
+  ],
+  "isSigned": false
+}
