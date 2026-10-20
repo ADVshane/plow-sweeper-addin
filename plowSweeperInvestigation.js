@@ -107,6 +107,31 @@ geotab.addin.plowSweeperInvestigation = function () {
     map.on(L.Draw.Event.EDITED, () => { drawn = items.getLayers()[0] || null; });
   }
 
+  // ---------- Address search (MyGeotab geocoder) ----------
+  let searchMarker;
+  const hint = (text, isError) => {
+    $('psi-map-hint').textContent = text;
+    $('psi-map-hint').classList.toggle('error', !!isError);
+  };
+  async function searchAddress(ev) {
+    ev.preventDefault();
+    const q = $('psi-address').value.trim();
+    if (!q) return;
+    hint('Searching...');
+    try {
+      const res = await call('GetCoordinates', { addresses: [q] });
+      const c = res && res[0];
+      if (!c || (c.x === 0 && c.y === 0)) return hint(`No match found for "${q}". Try adding the city and province or state.`, true);
+      map.setView([c.y, c.x], 16);
+      if (searchMarker) searchMarker.remove();
+      searchMarker = L.circleMarker([c.y, c.x], { radius: 8, color: '#fff', weight: 2, fillColor: '#0078d3', fillOpacity: 1 })
+        .addTo(map).bindTooltip(q).openTooltip();
+      hint('Found it. Now draw the area with the polygon or rectangle tool (top left of the map).');
+    } catch (e) {
+      hint('Address search failed: ' + errText(e), true);
+    }
+  }
+
   function zonePoints() {
     const pts = drawn.getLatLngs()[0].map(p => ({ x: p.lng, y: p.lat }));
     pts.push(pts[0]);   // close the polygon
@@ -306,6 +331,7 @@ geotab.addin.plowSweeperInvestigation = function () {
       $('psi-tab-new').onclick = () => showTab('new');
       $('psi-tab-runs').onclick = () => showTab('runs');
       $('psi-submit').onclick = submit;
+      $('psi-search').onsubmit = searchAddress;
       $('psi-refresh').onclick = loadRuns;
       $('psi-csv').onclick = exportCsv;
       callback();

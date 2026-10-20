@@ -44,7 +44,10 @@
     const api = {
       __preview: true,
       call(method, params, ok) {
-        setTimeout(() => ok(method === 'Get' ? get(params) : method === 'Add' ? 'preview' + (++n) : undefined), 250);
+        const result = method === 'Get' ? get(params)
+          : method === 'GetCoordinates' ? [{ x: -79.4613, y: 44.0592 }]   // sample: Newmarket, ON
+          : method === 'Add' ? 'preview' + (++n) : undefined;
+        setTimeout(() => ok(result), 250);
       },
       multiCall(calls, ok) { setTimeout(() => ok(calls.map(c => get(c[1]))), 250); },
       getSession(ok) { ok({ userName: 'preview@example.com', database: 'preview' }); }
